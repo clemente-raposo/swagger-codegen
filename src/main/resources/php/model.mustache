@@ -26,21 +26,21 @@
 
 class {{classname}} {
 
-  static $swaggerTypes = array(
-      {{#vars}}
-      '{{name}}' => '{{{datatype}}}'{{#hasMore}},
-      {{/hasMore}}
-      {{/vars}}{{newline}}
+    static $swaggerTypes = array(
+        {{#vars}}
+        '{{name}}' => '{{{datatype}}}'{{#hasMore}},
+        {{/hasMore}}
+        {{/vars}}
     );
 
-  {{#vars}}
-  {{#description}}
-  /**
-  * {{description}}
-  */
-  {{/description}}
-  public ${{name}}; // {{{datatype}}}
-  {{/vars}}
+    {{#vars}}
+    {{#description}}
+    /**
+     * {{description}}
+     */
+    {{/description}}
+    public ${{name}}; // {{{datatype}}}
+    {{/vars}}
 
 }
 {{/model}}
