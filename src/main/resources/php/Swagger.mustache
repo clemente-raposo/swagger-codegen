@@ -41,6 +41,8 @@ class APIClient {
     public static $GET = "GET";
     public static $PUT = "PUT";
     public static $DELETE = "DELETE";
+    
+    public $timeoutLimit = 60;
 
     /**
      * @param string $apiKey your API key
@@ -86,7 +88,7 @@ class APIClient {
         $url = $this->apiServer . $resourcePath;
 
         $curl = curl_init();
-        curl_setopt($curl, CURLOPT_TIMEOUT, 5);
+        curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeoutLimit);
         // return the result on success, rather than just TRUE
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
@@ -276,5 +278,14 @@ class APIClient {
             }
         }
         return $instance;
+    }
+    
+    public function setTimeoutLimit($limit) {
+          $this->timeoutLimit = $limit;
+          return $this;
+    }
+    
+    public function getTimeoutLimit() {
+          return $this->timeoutLimit;
     }
 }
