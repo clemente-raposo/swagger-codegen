@@ -20,6 +20,20 @@ function swagger_autoloader($className) {
 }
 spl_autoload_register('swagger_autoloader');
 
+/* Exception  - error_code 400 */
+class BadRequestException extends Exception {
+}
+
+/* Exception  - error_code 401 */
+class NotAuthorizedException extends Exception {
+}
+
+/* Exception  - error_code 403 */
+class ForbiddenException extends Exception {
+}
+
+class TimeoutException extends Exception {
+}
 
 class APIClient {
 
@@ -102,20 +116,26 @@ class APIClient {
 
         // Handle the response
         if ($response_info['http_code'] == 0) {
-            throw new Exception("TIMEOUT: api call to " . $url .
-                " took more than 5s to return" );
-        } else if ($response_info['http_code'] == 200) {
+            throw new TimeoutException("TIMEOUT: api call to " . $url . " took more than the limmit");
+        } 
+        else if ($response_info['http_code'] == 200) {
             $data = json_decode($response);
-        } else if ($response_info['http_code'] == 401) {
-            throw new Exception("Unauthorized API request to " . $url . ": ".json_decode($response)->error_message );
-        } else if ($response_info['http_code'] == 404) {
-            $data = null;
-        } else {
-            throw new Exception("Can't connect to the api: " . $url .
-                " response code: " .
-                $response_info['http_code']);
+        } 
+        else if ($response_info['http_code'] == 400) {
+            throw new BadRequestException("Bad request to " . $url . ": ".json_decode($response)->error_message );
+        } 
+        else if ($response_info['http_code'] == 401) {
+            throw new NotAuthorizedException("Access Unauthorized to " . $url . ": ".json_decode($response)->error_message );
         }
-
+        else if ($response_info['http_code'] == 403) {
+            throw new ForbiddenException("Access forbidden to " . $url . ": ".json_decode($response)->error_message );
+        }
+        else if ($response_info['http_code'] == 404) {
+            $data = null;
+        } 
+        else {
+            throw new Exception("Can't connect to the api: " . $url ." response code: " . $response_info['http_code']);
+        }
 
         return $data;
     }
