@@ -21,18 +21,26 @@ function swagger_autoloader($className) {
 spl_autoload_register('swagger_autoloader');
 
 /* Exception  - error_code 400 */
-class BadRequestException extends Exception {
+class APIClientBadRequestException extends Exception {
 }
 
 /* Exception  - error_code 401 */
-class NotAuthorizedException extends Exception {
+class APIClientNotAuthorizedException extends Exception {
 }
 
 /* Exception  - error_code 403 */
-class ForbiddenException extends Exception {
+class APIClientForbiddenException extends Exception {
 }
 
-class TimeoutException extends Exception {
+/* Exception  - error_code 404 */
+class APIClientNotFoundException extends Exception {
+}
+
+/* Exception  - error_code 422 */
+class APIClientInvalidArgumentException extends Exception {
+}
+
+class APIClientTimeoutException extends Exception {
 }
 
 class APIClient {
@@ -118,23 +126,26 @@ class APIClient {
 
         // Handle the response
         if ($response_info['http_code'] == 0) {
-            throw new TimeoutException("TIMEOUT: api call to " . $url . " took more than the limmit");
+            throw new APIClientTimeoutException("TIMEOUT: api call to " . $url . " took more than the limmit");
         } 
         else if ($response_info['http_code'] == 200) {
             $data = json_decode($response);
         } 
         else if ($response_info['http_code'] == 400) {
-            throw new BadRequestException("Bad request to " . $url . ": ".json_decode($response)->error_message );
+            throw new APIClientBadRequestException("Bad request to " . $url . ": ".json_decode($response)->error_message );
         } 
         else if ($response_info['http_code'] == 401) {
-            throw new NotAuthorizedException("Access Unauthorized to " . $url . ": ".json_decode($response)->error_message );
+            throw new APIClientNotAuthorizedException("Access Unauthorized to " . $url . ": ".json_decode($response)->error_message );
         }
         else if ($response_info['http_code'] == 403) {
-            throw new ForbiddenException("Access forbidden to " . $url . ": ".json_decode($response)->error_message );
+            throw new APIClientForbiddenException("Access forbidden to " . $url . ": ".json_decode($response)->error_message );
         }
         else if ($response_info['http_code'] == 404) {
-            $data = null;
-        } 
+            throw new APIClientNotFoundException("Resource not found in " . $url . ": ".json_decode($response)->error_message );
+        }
+        else if ($response_info['http_code'] == 422) {
+            throw new APIClientInvalidArgumentException("Invalid argument in " . $url . ": ".json_decode($response)->error_message );
+        }
         else {
             throw new Exception("Can't connect to the api: " . $url ." response code: " . $response_info['http_code']);
         }
